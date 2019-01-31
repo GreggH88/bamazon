@@ -1,41 +1,30 @@
-var mysql = require("mysql");
-var inquirer = require("inquirer");
+const mysql = require("mysql");
+const inquirer = require("inquirer");
+const cTable = require('console.table');
+
 
 var connection = mysql.createConnection({
   host: "localhost",
-
-  // Your port; if not 3306
   port: 3306,
-
-  // Your username
   user: "root",
-
-  // Your password
   password: "08816674b",
   database: "bamazon_db"
 });
 
-connection.connect(function (err) {
+connection.connect((err) => {
   if (err) throw err;
   console.log("connected as id " + connection.threadId);
   queryAllProducts();
-  
+
 });
 
 
 function queryAllProducts() {
-  connection.query("SELECT * FROM products", function (err, res) {
-    for (var i = 0; i < res.length; i++) {
-      console.log(res[i].item_id + " | " + res[i].product_name + " | " + res[i].department_name + " | " + res[i].price);
-    }
-    console.log("-----------------------------------");
+  const query = "SELECT * FROM products"
+  connection.query(query, function (err, res) {
+    console.table(res);
     newPurchase();
   });
-}
-
-function Order(item_id, quantity) {
-  this.item_id = item_id;
-  this.quanity = quantity;
 }
 
 function newPurchase() {
@@ -45,11 +34,36 @@ function newPurchase() {
   }, {
     name: "quantity",
     message: "How many would you like to purchase?"
-  }]).then(function (answers) {
-    // initializes the variable newProgrammer to be a programmer object which will take
-    // in all of the user's answers to the questions above
-    var newOrder = new Order(answers.item_id, answers.quantity);
-    // printInfo method is run to show that the newProgrammer object was successfully created and filled
-    console.log(newOrder);
+  }]).then((answers) => {
+    var query = "SELECT * FROM products WHERE ?";
+    connection.query(query, {
+        item_id: answers.item_id
+      },
+      function (err, res) {
+        if (res[0].stock_quantity >= answers.quantity) {
+          const total = res[0].price * answers.quantity;
+
+          console.log(`Purchase of ${answers.quantity} ${res[0].product_name}(s) confirmed for $${total}!\n`);
+
+          const order = parseInt(res[0].stock_quantity) - parseInt(answers.quantity);
+
+          connection.query("UPDATE products SET ? WHERE ?",
+            [{
+                stock_quantity: order
+              },
+              {
+                item_id: answers.item_id
+              }
+            ],
+            err => {
+              if (err) throw err;
+            })
+          queryAllProducts();
+        } else {
+          console.log("\nThere is not enough in stock. Please plce a different order.");
+          console.log("*******************************\n")
+          queryAllProducts();
+        }
+      });
   });
 };
