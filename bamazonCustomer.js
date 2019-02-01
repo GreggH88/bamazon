@@ -34,7 +34,7 @@ function newPurchase() {
   }, {
     name: "quantity",
     message: "How many would you like to purchase?"
-  }]).then((answers) => {
+  }]).then(answers => {
     var query = "SELECT * FROM products WHERE ?";
     connection.query(query, {
         item_id: answers.item_id
