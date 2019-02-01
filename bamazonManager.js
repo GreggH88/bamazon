@@ -35,6 +35,11 @@ function queryLowInventory() {
 };
 
 function addStock() {
+  const query = "SELECT * FROM products"
+  connection.query(query, function (err, res) {
+    console.log("\n");
+    console.table(res);
+  });
   inquirer.prompt([{
       name: "item_id",
       type: "input",
@@ -65,6 +70,7 @@ function addStock() {
             if (err) throw err;
           })
         queryAllProducts();
+
       })
   }))
 };
@@ -104,9 +110,12 @@ function addProduct() {
           if (err) throw err;
         }
       );
-      console.log()
-    })
-  dashBoard();
+      const query = "SELECT * FROM products"
+      connection.query(query, function (err, res) {
+        console.table(res);
+        dashBoard();
+      });
+    });
 };
 
 function exitOption() {

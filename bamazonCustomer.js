@@ -7,7 +7,7 @@ var connection = mysql.createConnection({
   host: "localhost",
   port: 3306,
   user: "root",
-  password: "08816674b",
+  password:"08816674b",
   database: "bamazon_db"
 });
 
@@ -60,7 +60,7 @@ function newPurchase() {
             })
           queryAllProducts();
         } else {
-          console.log("\nThere is not enough in stock. Please plce a different order.");
+          console.log("\nThere is not enough in stock. Please place a different order.");
           console.log("*******************************\n")
           queryAllProducts();
         }
